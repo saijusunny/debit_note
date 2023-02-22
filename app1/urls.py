@@ -839,12 +839,15 @@ urlpatterns = [
     path('data_fetch_dbt/',views.data_fetch_dbt,name='data_fetch_dbt'),
     path('qty_add_dbt/',views.qty_add_dbt,name='qty_add_dbt'), 
     path('stock_accuracy_dbt/',views.stock_accuracy_dbt,name='stock_accuracy_dbt'),
+
+
     path('list_deb_voucher/',views.list_deb_voucher,name='list_deb_voucher'),
     path('list_crd_voucher/',views.list_crd_voucher,name='list_crd_voucher'),
-
+    path('vouchers_dbt_fr/',views.vouchers_dbt_fr,name='vouchers_dbt_fr'),
+    path('create_voucher_dbt_fr/',views.create_voucher_dbt_fr,name='create_voucher_dbt_fr'),
+    path('vouchers_crd_fr/',views.vouchers_crd_fr,name='vouchers_crd_fr'),
+    path('create_voucher_crd_fr/',views.create_voucher_crd_fr,name='create_voucher_crd_fr'),
     
-
-
 
     path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
               

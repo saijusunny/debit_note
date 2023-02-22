@@ -103,7 +103,7 @@
             <form action="{% url 'debits_note' %}" id="frmvouch" method="POST"  style="background-color:rgba(0,0,0,.4);">
                 {% csrf_token %}
                 <div class="row container-fluid center  p-2 m-0">
-                    <a href="vouchers" style="cursor:pointer" class="btn bt btns_prnt" role="button">Create</a>  
+                    <a href="{% url 'vouchers_dbt_fr' %}" style="cursor:pointer" class="btn bt btns_prnt" role="button">Create</a>  
 
                     <div class="col-sm-2 m-0 p-0"></div>
                     <div class="col-sm-2 mt-3 p-0"> <label for="b" class="text-light">Name:</label></div>
@@ -124,7 +124,7 @@
                 <div class="form-popup ScrollStyle" id="showForm" style="background-color: #213b52" >
                         <h6 style="background-color:rgb(17, 169, 240) ;color:white text">List of Types</h6>
                         <button type="button" class="btn cancel close mt-0 fa fa-times fadeOut" onclick="closeForm()"></button>
-                        <a href="vouchers" style="cursor:pointer" class="btn bt btns_prnt" role="button">Create</a>  
+                        <a href="{% url 'vouchers_dbt_fr' %}" style="cursor:pointer" class="btn bt btns_prnt" role="button">Create</a>  
                         <hr>
                         <div>
                             <table>

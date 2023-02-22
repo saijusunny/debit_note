@@ -11847,10 +11847,7 @@ def credit_notess(request):
     now = datetime.now()
     dt_nm=now.strftime("%A")
 
-    try:
-        tps=Voucher.objects.filter(company=cmp1, voucher_type="Credit_Note")
-    except:
-        tps=None
+    
     
     try:
         setups=Voucher.objects.get(company=cmp1,voucher_name=type)
@@ -11867,7 +11864,7 @@ def credit_notess(request):
     ldg1=tally_ledger.objects.filter(company=cmp1,under="Sales_Account")
     item = stock_itemcreation.objects.all() 
     godown = Godown_Items.objects.filter(comp=cmp1) 
-    context = {'cmp1': cmp1,'item':item,'ldg':ldg,"ldg1":ldg1,"crd_num":crd_num,"financial_year":financial_year,"dt_nm":dt_nm,"godown":godown, "setup_no":setup_no,"setup_nar":setup_nar,'now':now,"tps":tps} 
+    context = {'cmp1': cmp1,'item':item,'ldg':ldg,"ldg1":ldg1,"crd_num":crd_num,"financial_year":financial_year,"dt_nm":dt_nm,"godown":godown, "setup_no":setup_no,"setup_nar":setup_nar,'now':now} 
     return render(request,'credit_note.html',context)
 
 def itemdata(request):
@@ -11905,7 +11902,7 @@ def savrecdet(request):
         try:
             crd_num= int(idss.screditid)+1
         except:
-            pass
+            crd_num=1
         try:
             track_no= request.GET.get('track_no')
             dis_doc_no= request.GET.get('dis_doc_no')
@@ -12005,8 +12002,12 @@ def savrecdet(request):
         gst_uin = items.gst_uin
         cr_bal = items.gst_uin
         opn_bal = items.opening_blnc
+        # blnc_type = items.opening_blnc_type
+        # bal_amount=str(opn_bal)+str(blnc_type)
+
         blnc_type = items.opening_blnc_type
         bal_amount=str(opn_bal)+str(blnc_type)
+        bal_amount=str(format(opn_bal).lstrip("-"))+str(blnc_type)
         
         
         
@@ -12447,7 +12448,7 @@ def get_sl_det(request):
      
         opening_blnc = items.opening_blnc
         opening_blnc_type = items.opening_blnc_type
-        bal_amount=str(opening_blnc)+str(opening_blnc_type)
+        bal_amount=str(opening_blnc)+str("Dr")
         
         
         
@@ -12699,9 +12700,11 @@ def debits_note(request):
     
     try:
         
-        setups=Voucher.objects.filter(company=cmp1, voucher_name=type)
+        setups=Voucher.objects.get(company=cmp1, voucher_name=type)
         setup_no=setups.voucherNumber
         setup_nar=setups.voucherNarration
+
+       
     except:
         setup_no=" "
         setup_nar=" "
@@ -12749,16 +12752,39 @@ def create_debit(request):
             ldg1=tally_ledger.objects.get(company=cmp1,name=pdebit.customer)
             cr_bal=float(ldg1.opening_blnc)+float(pdebit.grandtotal)
             dr_bal=float(pdebit.grandtotal)-float(ldg1.opening_blnc)
-            if ldg1.opening_blnc_type=="Cr":
-                ldg1.opening_blnc=cr_bal
+            # if ldg1.opening_blnc_type=="Cr":
+            #     ldg1.opening_blnc=cr_bal
                 
-            else:
-                ldg1.opening_blnc=dr_bal
+            # else:
+            #     ldg1.opening_blnc=dr_bal
                
-                if float(pdebit.grandtotal)>float(dr_bal):
-                    ldg1.opening_blnc_type="Dr"
-                else:
+            #     if float(pdebit.grandtotal)>float(dr_bal):
+            #         ldg1.opening_blnc_type="Dr"
+            #     else:
+            #         ldg1.opening_blnc_type="Cr"
+
+            print(pdebit.grandtotal)
+            print(ldg1.opening_blnc)
+            if float(pdebit.grandtotal)>float(ldg1.opening_blnc):
+                print("true")
+                if ldg1.opening_blnc_type=="Dr":
+                    print("dr true")
                     ldg1.opening_blnc_type="Cr"
+                    ldg1.opening_blnc=dr_bal
+                else:
+                    print("dr false")
+                    ldg1.opening_blnc_type="Dr"
+                    
+                    ldg1.opening_blnc=dr_bal
+            else:
+                if ldg1.opening_blnc_type=="Cr":
+                    print("true")
+                    ldg1.opening_blnc_type="Dr"
+                    ldg1.opening_blnc=cr_bal
+                else:
+                    print("false")
+                    ldg1.opening_blnc_type="Cr"
+                    ldg1.opening_blnc=cr_bal
              
                 
 
@@ -13013,6 +13039,7 @@ def savrecdet_dbt(request):
         opn_bal = items.opening_blnc
         blnc_type = items.opening_blnc_type
         bal_amount=str(opn_bal)+str(blnc_type)
+        bal_amount=str(format(opn_bal).lstrip("-"))+str(blnc_type)
         
         
         
@@ -13393,16 +13420,7 @@ def list_deb_voucher(request):
         else:
             return redirect('/')
 
-        ledger = tally_ledger.objects.all()
-        for i in range(len(ledger)):
-            #print(ledger[i])
-            
-            if ledger[i].current_blnc is None:
-                ledger[i].current_blnc = ledger[i].opening_blnc
-                ledger[i].current_blnc_type = ledger[i].opening_blnc_type
-
-                ledger[i].save()
-        #print(ledger)
+        
 
         voucher = Voucher.objects.filter(voucher_type = 'Debit_Note')
         context = {
@@ -13418,20 +13436,174 @@ def list_crd_voucher(request):
         else:
             return redirect('/')
 
-        ledger = tally_ledger.objects.all()
-        for i in range(len(ledger)):
-            #print(ledger[i])
-            
-            if ledger[i].current_blnc is None:
-                ledger[i].current_blnc = ledger[i].opening_blnc
-                ledger[i].current_blnc_type = ledger[i].opening_blnc_type
-
-                ledger[i].save()
-        #print(ledger)
-
         voucher = Voucher.objects.filter(voucher_type = 'Credit_Note')
         context = {
                     'voucher': voucher,
 
                 }
         return render(request,'list_crd_type.html',context)
+
+
+
+def vouchers_dbt_fr(request):
+    if 't_id' in request.session:
+        if request.session.has_key('t_id'):
+            t_id = request.session['t_id']
+        else:
+            return redirect('/')
+        tally = Companies.objects.filter(id=t_id)
+        return render(request, 'vouchers_dbt_fr.html',{'tally':tally})
+    return redirect('/')
+
+def create_voucher_dbt_fr(request):
+    if 't_id' in request.session:
+        if request.session.has_key('t_id'):
+            t_id = request.session['t_id']
+        else:
+            return redirect('/')
+        tally = Companies.objects.filter(id=t_id)
+        if request.method=='POST':
+            # cmp=Companies.objects.get(id=pk)
+        
+            nm=request.POST['vname']
+            als=request.POST['alias']
+            vtp=request.POST['vouch_type']
+            abbr=request.POST['Abbreviation']
+            actp=request.POST['activate_Vtype']
+            mvno=request.POST['method_Vno']
+            prnt=request.POST['prevent']
+            acn=request.POST['advance_con']
+            use=request.POST['use_EDV']
+            zero=request.POST['zero_val']
+            mvd=request.POST['mVoptional_defualt']
+            anar=request.POST['allow_nar']
+            prvdl=request.POST['provide_L']
+            jrnl=request.POST['manu_jrnl']
+            track=request.POST['track_purchase']
+            enbl=request.POST['enable_acc']
+            prntva=request.POST['prnt_VA_save']
+            prntfml=request.POST['prnt_frml']
+            juri=request.POST['jurisdiction']
+            tprint=request.POST['title_print']
+            setaltr=request.POST['set_alter']
+            posinv=request.POST['pos_invoice']
+            msg1=request.POST['msg_1']
+            msg2=request.POST['msg_2']
+            dbank=request.POST['default_bank']
+            nc=request.POST['name_class']
+
+            vhr=Voucher(voucher_name=nm,
+                        alias = als,
+                        voucher_type = vtp,
+                        abbreviation = abbr,
+                        voucherActivate = actp,
+                        voucherNumber = mvno,
+                        preventDuplicate = prnt,
+                        advance_con = acn,
+                        voucherEffective = use,
+                        transaction = zero,
+                        make_optional = mvd,
+                        voucherNarration = anar,
+                        provideNarration = prvdl,
+                        manu_jrnl = jrnl,
+                        track_purchase = track,
+                        enable_acc = enbl,
+                        prnt_VA_save = prntva,
+                        prnt_frml = prntfml,
+                        jurisdiction = juri,
+                        title_print = tprint,
+                        set_alter = setaltr,
+                        pos_invoice = posinv,
+                        msg_1 = msg1,
+                        msg_2 = msg2,
+                        default_bank = dbank,
+                        name_class = nc,
+                        company_id=t_id)          
+            vhr.save()
+            print("Added")
+            return redirect('list_deb_voucher')
+        return render(request,'vouchers.html',{'tally':tally})
+    return redirect('/')
+
+
+
+
+def vouchers_crd_fr(request):
+    if 't_id' in request.session:
+        if request.session.has_key('t_id'):
+            t_id = request.session['t_id']
+        else:
+            return redirect('/')
+        tally = Companies.objects.filter(id=t_id)
+        return render(request, 'vouchers_crd_fr.html',{'tally':tally})
+    return redirect('/')
+
+def create_voucher_crd_fr(request):
+    if 't_id' in request.session:
+        if request.session.has_key('t_id'):
+            t_id = request.session['t_id']
+        else:
+            return redirect('/')
+        tally = Companies.objects.filter(id=t_id)
+        if request.method=='POST':
+            # cmp=Companies.objects.get(id=pk)
+        
+            nm=request.POST['vname']
+            als=request.POST['alias']
+            vtp=request.POST['vouch_type']
+            abbr=request.POST['Abbreviation']
+            actp=request.POST['activate_Vtype']
+            mvno=request.POST['method_Vno']
+            prnt=request.POST['prevent']
+            acn=request.POST['advance_con']
+            use=request.POST['use_EDV']
+            zero=request.POST['zero_val']
+            mvd=request.POST['mVoptional_defualt']
+            anar=request.POST['allow_nar']
+            prvdl=request.POST['provide_L']
+            jrnl=request.POST['manu_jrnl']
+            track=request.POST['track_purchase']
+            enbl=request.POST['enable_acc']
+            prntva=request.POST['prnt_VA_save']
+            prntfml=request.POST['prnt_frml']
+            juri=request.POST['jurisdiction']
+            tprint=request.POST['title_print']
+            setaltr=request.POST['set_alter']
+            posinv=request.POST['pos_invoice']
+            msg1=request.POST['msg_1']
+            msg2=request.POST['msg_2']
+            dbank=request.POST['default_bank']
+            nc=request.POST['name_class']
+
+            vhr=Voucher(voucher_name=nm,
+                        alias = als,
+                        voucher_type = vtp,
+                        abbreviation = abbr,
+                        voucherActivate = actp,
+                        voucherNumber = mvno,
+                        preventDuplicate = prnt,
+                        advance_con = acn,
+                        voucherEffective = use,
+                        transaction = zero,
+                        make_optional = mvd,
+                        voucherNarration = anar,
+                        provideNarration = prvdl,
+                        manu_jrnl = jrnl,
+                        track_purchase = track,
+                        enable_acc = enbl,
+                        prnt_VA_save = prntva,
+                        prnt_frml = prntfml,
+                        jurisdiction = juri,
+                        title_print = tprint,
+                        set_alter = setaltr,
+                        pos_invoice = posinv,
+                        msg_1 = msg1,
+                        msg_2 = msg2,
+                        default_bank = dbank,
+                        name_class = nc,
+                        company_id=t_id)          
+            vhr.save()
+            print("Added")
+            return redirect('list_crd_voucher')
+        return render(request,'vouchers.html',{'tally':tally})
+    return redirect('/')

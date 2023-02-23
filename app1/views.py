@@ -12720,6 +12720,22 @@ def debits_note(request):
 
 
 
+
+
+
+def crt_ledg_dbt(request):
+    if 't_id' in request.session:
+        if request.session.has_key('t_id'):
+            t_id = request.session['t_id']
+        else:
+            return redirect('/')
+        tally = Companies.objects.filter(id=t_id)
+        # grp=tally_group.objects.all()
+        grp=tally_group.objects.filter(company=t_id)
+        return render(request,'ledger_debit.html',{'grp' : grp,'tally':tally})
+    return redirect('debits_note')
+
+
 def create_debit(request):
     
     if 't_id' in request.session:
@@ -12751,40 +12767,28 @@ def create_debit(request):
 
             ldg1=tally_ledger.objects.get(company=cmp1,name=pdebit.customer)
             cr_bal=float(ldg1.opening_blnc)+float(pdebit.grandtotal)
-            dr_bal=float(pdebit.grandtotal)-float(ldg1.opening_blnc)
-            # if ldg1.opening_blnc_type=="Cr":
-            #     ldg1.opening_blnc=cr_bal
-                
-            # else:
-            #     ldg1.opening_blnc=dr_bal
-               
-            #     if float(pdebit.grandtotal)>float(dr_bal):
-            #         ldg1.opening_blnc_type="Dr"
-            #     else:
-            #         ldg1.opening_blnc_type="Cr"
+            bal_amount=float(pdebit.grandtotal)-float(ldg1.opening_blnc)
 
-            print(pdebit.grandtotal)
-            print(ldg1.opening_blnc)
+            dr_bal =float(format(bal_amount).lstrip("-"))
+              
             if float(pdebit.grandtotal)>float(ldg1.opening_blnc):
-                print("true")
+               
                 if ldg1.opening_blnc_type=="Dr":
-                    print("dr true")
+                 
                     ldg1.opening_blnc_type="Cr"
                     ldg1.opening_blnc=dr_bal
                 else:
-                    print("dr false")
+                   
                     ldg1.opening_blnc_type="Dr"
                     
                     ldg1.opening_blnc=dr_bal
             else:
-                if ldg1.opening_blnc_type=="Cr":
-                    print("true")
-                    ldg1.opening_blnc_type="Dr"
-                    ldg1.opening_blnc=cr_bal
+
+                if ldg1.opening_blnc_type=="Dr":
+                    ldg1.opening_blnc=dr_bal
                 else:
-                    print("false")
-                    ldg1.opening_blnc_type="Cr"
-                    ldg1.opening_blnc=cr_bal
+              
+                    ldg1.opening_blnc=dr_bal
              
                 
 
@@ -12818,20 +12822,10 @@ def create_debit(request):
         
         return redirect('debits_note')
     return redirect('/') 
-
-
-def crt_ledg_dbt(request):
-    if 't_id' in request.session:
-        if request.session.has_key('t_id'):
-            t_id = request.session['t_id']
-        else:
-            return redirect('/')
-        tally = Companies.objects.filter(id=t_id)
-        # grp=tally_group.objects.all()
-        grp=tally_group.objects.filter(company=t_id)
-        return render(request,'ledger_debit.html',{'grp' : grp,'tally':tally})
-    return redirect('debits_note')
    
+
+
+
 
 
 def create_ledger_debt(request):

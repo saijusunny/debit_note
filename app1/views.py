@@ -12668,6 +12668,9 @@ def stock_godowncrd(request):
         return render(request,'stock_godowncrd.html',{'gd':gd,'tally':tally})
     return redirect('/')
 
+
+
+
 # debit Note--------------------------------------------------------------------------------
 
 def debits_note(request):
@@ -13414,9 +13417,11 @@ def list_deb_voucher(request):
         else:
             return redirect('/')
 
+        cmp1 = Companies.objects.get(id=request.session['t_id'])
+
         
 
-        voucher = Voucher.objects.filter(voucher_type = 'Debit_Note')
+        voucher = Voucher.objects.filter(company=cmp1,voucher_type = 'Debit_Note')
         context = {
                     'voucher': voucher,
 
@@ -13429,8 +13434,8 @@ def list_crd_voucher(request):
             t_id = request.session['t_id']
         else:
             return redirect('/')
-
-        voucher = Voucher.objects.filter(voucher_type = 'Credit_Note')
+        cmp1 = Companies.objects.get(id=request.session['t_id'])
+        voucher = Voucher.objects.filter(company=cmp1,voucher_type = 'Credit_Note')
         context = {
                     'voucher': voucher,
 

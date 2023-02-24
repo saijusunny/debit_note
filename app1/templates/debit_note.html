@@ -1603,13 +1603,19 @@
                     // var gal = document.getElementById("gallary")
                     
                     for (var {name: n, quantity: qty, id: no} of godown){
+
+                        if(qty<0){
+                            var qtys=0
+                        }else{
+                            var qtys=qty
+                        }
                         
                         $('#li_data_gd').append(`
                         <ul id="gallary">
                         
                         <li onclick="addgd('Primary')"><a href="" data-dismiss="modal" data-target="#item_sltd" data-toggle="modal">Primary</a></li>
                         <li onclick="addgd('Main Location')"><a href="" data-dismiss="modal" data-target="#item_sltd" data-toggle="modal">Main Location</a></li>
-                        <li><a href="" data-dismiss="modal" data-target="#item_sltd" data-toggle="modal"><p  class="name"  onclick="addgd('${n}', '${no}')" value="${n}" name="item_nm" id ="item_nm">${n} <span style='margin-left:200px'>${qty}</span> </p></a></li> </ul>`)
+                        <li><a href="" data-dismiss="modal" data-target="#item_sltd" data-toggle="modal"><p  class="name"  onclick="addgd('${n}', '${no}')" value="${n}" name="item_nm" id ="item_nm">${n} <span style='margin-left:200px'>${qtys}</span> </p></a></li> </ul>`)
                         // gal.append(n + qty );
                     }
                     

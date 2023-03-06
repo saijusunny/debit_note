@@ -52,8 +52,45 @@ def login(request):
                 member=Companies.objects.get(email=request.POST['email'], password=request.POST['password'])
                 request.session['t_id'] = member.id 
                 tally=Companies.objects.filter(id= member.id)
+                tallys=Companies.objects.get(id= request.session['t_id'])
+
+                try:
+                    crd_dt=credit_note.objects.filter(comp=request.session['t_id']).aggregate(Max('creditdate')).get('creditdate__max')
+                    deb_dt=debit_note.objects.filter(comp=request.session['t_id']).aggregate(Max('debitdate')).get('debitdate__max')
+                    pay_dt=payment_voucher.objects.all().aggregate(Max('date')).get('date__max')
+                    
+                    rec_dt=receipt_voucher.objects.all().aggregate(Max('date')).get('date__max')
+                    contra_dt=contra_voucher.objects.filter(cid=request.session['t_id']).aggregate(Max('date')).get('date__max')
+
+                    
+                    lst_mxdt=[]
+                    if crd_dt!=None:
+                        lst_mxdt.insert(-1,crd_dt)
+                    else:
+                        pass
+                    if deb_dt!=None:
+                        lst_mxdt.insert(-1,deb_dt)
+                    else:
+                        pass
+                    if pay_dt!=None:
+                        lst_mxdt.insert(-1,pay_dt)
+                    else:
+                        pass
+                    if rec_dt!=None:
+                        lst_mxdt.insert(-1,rec_dt)
+                    else:
+                        pass 
+                    if contra_dt!=None:
+                        lst_mxdt.insert(-1,contra_dt)
+                    else:
+                        pass
+                        
+                    last_vch_dt=max(lst_mxdt)
+                except:
+                    last_vch_dt=date.today()
                 
-                return render(request,'base.html',{'tally':tally})
+                
+                return render(request,'base.html',{'tally':tally,"last_vch_dt":last_vch_dt,"tallys":tallys})
     
         else:
             context = {'msg_error': 'Invalid data'}
@@ -13606,3 +13643,6 @@ def create_voucher_crd_fr(request):
             return redirect('list_crd_voucher')
         return render(request,'vouchers.html',{'tally':tally})
     return redirect('/')
+
+def list_contra_voucher(request):
+    pass

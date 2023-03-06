@@ -846,7 +846,8 @@ urlpatterns = [
     path('vouchers_dbt_fr/',views.vouchers_dbt_fr,name='vouchers_dbt_fr'),
     path('create_voucher_dbt_fr/',views.create_voucher_dbt_fr,name='create_voucher_dbt_fr'),
     path('vouchers_crd_fr/',views.vouchers_crd_fr,name='vouchers_crd_fr'),
-    path('create_voucher_crd_fr/',views.create_voucher_crd_fr,name='create_voucher_crd_fr'),
+    path('create_voucher_crd_fr/',views.create_voucher_crd_fr,name='create_voucher_crd_fr'), 
+    path('list_contra_voucher/',views.list_contra_voucher,name='list_contra_voucher'),
     
 
     path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
